@@ -10,7 +10,9 @@ var (
 
 type NodeStore interface {
 	GetNode(id NodeID, node *Node) error
+	GetNodes(nodes *[]*Node) error
 	PutNode(node *Node) error
+	PutEdge(tailID, headID NodeID, both bool) error
 }
 
 type TableStore interface {
@@ -22,4 +24,9 @@ type TableStore interface {
 			currentTable, fromTable *Table,
 		) (*Table, error),
 	) (*Table, error)
+	GetTable(
+		ctx context.Context,
+		id NodeID,
+		tbl *Table,
+	) error
 }
