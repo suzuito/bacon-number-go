@@ -42,22 +42,27 @@ func NewTableStoreImpl() *TableStoreImpl {
 
 func (t *TableStoreImpl) UpdateTable(
 	ctx context.Context,
-	id entity.NodeID,
+	currentID entity.NodeID,
+	fromID entity.NodeID,
 	fn func(
-		currentTable *entity.Table,
+		currentTable, fromTable *entity.Table,
 	) (*entity.Table, error),
 ) (*entity.Table, error) {
-	currentTable := entity.Table{}
 	exist := false
-	if currentTable, exist = t.tables[id]; !exist {
+	currentTable := entity.Table{}
+	if currentTable, exist = t.tables[currentID]; !exist {
 		currentTable = entity.Table{}
 	}
-	updatedTable, err := fn(&currentTable)
+	fromTable := entity.Table{}
+	if fromTable, exist = t.tables[fromID]; !exist {
+		fromTable = entity.Table{}
+	}
+	updatedTable, err := fn(&currentTable, &fromTable)
 	if err != nil {
 		return nil, err
 	}
 	if updatedTable != nil {
-		t.tables[id] = *updatedTable
+		t.tables[currentID] = *updatedTable
 	}
 	return updatedTable, nil
 }

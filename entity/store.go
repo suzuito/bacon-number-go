@@ -16,9 +16,10 @@ type NodeStore interface {
 type TableStore interface {
 	UpdateTable(
 		ctx context.Context,
-		id NodeID,
+		currentID NodeID,
+		fromID NodeID,
 		fn func(
-			currentTable *Table,
+			currentTable, fromTable *Table,
 		) (*Table, error),
 	) (*Table, error)
 }

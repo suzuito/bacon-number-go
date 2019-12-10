@@ -28,12 +28,17 @@ func (t *TableRow) Clone() *TableRow {
 // Table ...
 type Table map[NodeID]*TableRow
 
-func (t *Table) UpdateCost(nextID NodeID, cost int) {
-	if _, exist := (*t)[nextID]; !exist {
-		(*t)[nextID] = NewTableRow(nextID)
+func (t *Table) UpdateCost(
+	fromID NodeID,
+	fromTable *Table,
+	cost int,
+) {
+	if _, exist := (*t)[fromID]; !exist {
+		(*t)[fromID] = NewTableRow(fromID)
 	}
 	for _, row := range *t {
-		row.NextID = nextID
+
+		row.NextID = fromID
 		row.Cost += cost
 	}
 }
@@ -78,9 +83,10 @@ func (d *DVRImpl) Update(
 	return d.TableStore.UpdateTable(
 		ctx,
 		currentID,
-		func(currentTable *Table) (*Table, error) {
+		fromID,
+		func(currentTable, fromTable *Table) (*Table, error) {
 			updatedTable := currentTable.Clone()
-			updatedTable.UpdateCost(fromID, cost)
+			updatedTable.UpdateCost(fromID, fromTable, cost)
 			diffTable := currentTable.Merge(updatedTable)
 			if len(*diffTable) <= 0 {
 				// Stable
